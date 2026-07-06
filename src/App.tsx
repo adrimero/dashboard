@@ -10,7 +10,7 @@ function App() {
          <Grid size={{ xs: 12, md: 12 }}>Elemento: Encabezado</Grid>
 
          {/* Alertas */}
-         <Grid>Elemento: Alertas</Grid>
+         <Grid>Elemento: Alertass</Grid>
 
          {/* Selector */}
          <Grid size={{ xs: 12, md: 3  }}>Elemento: Selector</Grid>
