@@ -23,8 +23,8 @@ function App() {
     return <h2>Cargando datos...</h2>;
   }
 
-  if (loading) {
-    return <h2>Cargando datos...</h2>;
+  if (error) {
+    return <h2>Error: {error}</h2>;
   }
 
   return (
