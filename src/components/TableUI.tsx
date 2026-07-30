@@ -1,73 +1,106 @@
-import Box from '@mui/material/Box';
-import { DataGrid, type GridColDef } from '@mui/x-data-grid';
+import Box from "@mui/material/Box";
+import {
+  DataGrid,
+  type GridColDef,
+} from "@mui/x-data-grid";
 
-function combineArrays(arrLabels: Array<string>, arrValues1: Array<number>, arrValues2: Array<number>) {
-   return arrLabels.map((label, index) => ({
-      id: index,
-      label: label,
-      value1: arrValues1[index],
-      value2: arrValues2[index]
-   }));
+interface WeatherRow {
+  id: number;
+  date: string;
+  hour: string;
+  temperature: number;
+  humidity: number;
 }
 
-const columns: GridColDef[] = [
-   { field: 'id', headerName: 'ID', width: 90 },
-   {
-      field: 'label',
-      headerName: 'Label',
-      width: 125,
-   },
-   {
-      field: 'value1',
-      headerName: 'Value 1',
-      width: 125,
-   },
-   {
-      field: 'value2',
-      headerName: 'Value 2',
-      width: 125,
-   },
-   {
-      field: 'resumen',
-      headerName: 'Resumen',
-      description: 'No es posible ordenar u ocultar esta columna.',
-      sortable: false,
-      hideable: false,
-      width: 100,
-      valueGetter: (_, row) => `${row.label || ''} ${row.value1 || ''} ${row.value2 || ''}`,
-   },
+interface TableUIProps {
+  arrLabels: string[];
+  arrValues1: number[];
+  arrValues2: number[];
+}
+
+function combineArrays(
+  arrLabels: string[],
+  arrValues1: number[],
+  arrValues2: number[]
+): WeatherRow[] {
+  return arrLabels
+    .slice(0, 24)
+    .map((dateTime, index) => ({
+      id: index + 1,
+      date: dateTime.slice(0, 10),
+      hour: dateTime.slice(11, 16),
+      temperature: arrValues1[index],
+      humidity: arrValues2[index],
+    }));
+}
+
+const columns: GridColDef<WeatherRow>[] = [
+  {
+    field: "id",
+    headerName: "N.º",
+    width: 70,
+    align: "center",
+    headerAlign: "center",
+  },
+  {
+    field: "date",
+    headerName: "Fecha",
+    minWidth: 120,
+    flex: 1,
+  },
+  {
+    field: "hour",
+    headerName: "Hora",
+    minWidth: 90,
+    flex: 1,
+  },
+  {
+    field: "temperature",
+    headerName: "Temperatura (°C)",
+    type: "number",
+    minWidth: 160,
+    flex: 1,
+    align: "center",
+    headerAlign: "center",
+  },
+  {
+    field: "humidity",
+    headerName: "Humedad (%)",
+    type: "number",
+    minWidth: 140,
+    flex: 1,
+    align: "center",
+    headerAlign: "center",
+  },
 ];
 
-interface Props {
-    arrLabels: Array<string>;
-    arrValues1: Array<number>;
-    arrValues2: Array<number>;
-}
-
-
 export default function TableUI({
+  arrLabels,
+  arrValues1,
+  arrValues2,
+}: TableUIProps) {
+  const rows = combineArrays(
     arrLabels,
     arrValues1,
     arrValues2
-}: Props) {
+  );
 
-   const rows = combineArrays(arrLabels, arrValues1, arrValues2);
-
-   return (
-      <Box sx={{ height: 350, width: '100%' }}>
-         <DataGrid
-            rows={rows}
-            columns={columns}
-            initialState={{
-               pagination: {
-                  paginationModel: {
-                     pageSize: 5,
-                  },
-               },
-            }}
-            pageSizeOptions={[5]}
-            disableRowSelectionOnClick
-         />
-      </Box>
-   );
+  return (
+    <Box sx={{ height: 400, width: "100%" }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              page: 0,
+              pageSize: 6,
+            },
+          },
+        }}
+        pageSizeOptions={[6, 12, 24]}
+        disableRowSelectionOnClick
+      />
+    </Box>
+  );
 }

@@ -1,50 +1,54 @@
 import "./App.css";
+
 import { useState } from "react";
+
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
 
 import useFetchData from "./hooks/useFetchData";
-import HeaderUI from "./components/HeaderUI";
+
 import AlertUI from "./components/AlertUI";
-import SelectorUI from "./components/SelectorUI";
-import IndicatorUI from "./components/IndicatorUI";
-import TableUI from "./components/TableUI";
 import ChartUI from "./components/ChartUI";
+import HeaderUI from "./components/HeaderUI";
+import IndicatorUI from "./components/IndicatorUI";
+import SelectorUI from "./components/SelectorUI";
+import TableUI from "./components/TableUI";
 
 function App() {
-  // Ciudad seleccionada por el usuario.
-  // Al iniciar en null, el hook utilizará Guayaquil.
   const [selectedOption, setSelectedOption] =
     useState<string | null>(null);
 
-  // Se comunica la ciudad seleccionada al hook.
-  const {data,loading,error} = useFetchData(selectedOption);
+  const { data, loading, error } =
+    useFetchData(selectedOption);
 
-  if (loading) {
-    return <h2>Cargando datos...</h2>;
-  }
-
-  if (error) {
-    return <h2>Error: {error}</h2>;
-  }
+  const selectedCity =
+    selectedOption ?? "Guayaquil";
 
   return (
     <Grid
+      className="dashboard"
       container
-      spacing={5}
+      spacing={3}
       sx={{
         justifyContent: "center",
-        alignItems: "center",
+        alignItems: "stretch",
       }}
     >
       {/* Encabezado */}
-      <Grid size={{ xs: 12, md: 12 }}>
+      <Grid
+        className="dashboard-header"
+        size={{ xs: 12 }}
+      >
         <HeaderUI />
       </Grid>
 
-      {/* Alerta */}
+      {/* Alerta informativa */}
       <Grid
         container
-        size={{ xs: 12, md: 12 }}
+        size={{ xs: 12 }}
         sx={{
           justifyContent: "flex-end",
           alignItems: "center",
@@ -54,7 +58,10 @@ function App() {
       </Grid>
 
       {/* Selector */}
-      <Grid size={{ xs: 12, md: 3 }}>
+      <Grid
+        className="dashboard-selector"
+        size={{ xs: 12, md: 3 }}
+      >
         <SelectorUI
           onOptionSelect={setSelectedOption}
         />
@@ -62,50 +69,78 @@ function App() {
 
       {/* Indicadores */}
       <Grid
+        className="dashboard-indicators"
         container
         spacing={2}
         size={{ xs: 12, md: 9 }}
       >
-        <Grid size={{ xs: 12, md: 3 }}>
-          {data && (
-            <IndicatorUI
-              title="Temperatura (2 m)"
-              description={`${data.current.temperature_2m} ${data.current_units.temperature_2m}`}
-            />
-          )}
-        </Grid>
+        {data && (
+          <>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <IndicatorUI
+                title="Temperatura (2 m)"
+                description={`${data.current.temperature_2m} ${data.current_units.temperature_2m}`}
+              />
+            </Grid>
 
-        <Grid size={{ xs: 12, md: 3 }}>
-          {data && (
-            <IndicatorUI
-              title="Temperatura aparente"
-              description={`${data.current.apparent_temperature} ${data.current_units.apparent_temperature}`}
-            />
-          )}
-        </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <IndicatorUI
+                title="Temperatura aparente"
+                description={`${data.current.apparent_temperature} ${data.current_units.apparent_temperature}`}
+              />
+            </Grid>
 
-        <Grid size={{ xs: 12, md: 3 }}>
-          {data && (
-            <IndicatorUI
-              title="Velocidad del viento"
-              description={`${data.current.wind_speed_10m} ${data.current_units.wind_speed_10m}`}
-            />
-          )}
-        </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <IndicatorUI
+                title="Velocidad del viento"
+                description={`${data.current.wind_speed_10m} ${data.current_units.wind_speed_10m}`}
+              />
+            </Grid>
 
-        <Grid size={{ xs: 12, md: 3 }}>
-          {data && (
-            <IndicatorUI
-              title="Humedad relativa"
-              description={`${data.current.relative_humidity_2m} ${data.current_units.relative_humidity_2m}`}
-            />
-          )}
-        </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <IndicatorUI
+                title="Humedad relativa"
+                description={`${data.current.relative_humidity_2m} ${data.current_units.relative_humidity_2m}`}
+              />
+            </Grid>
+          </>
+        )}
       </Grid>
+
+      {/* Mensaje de carga sin desmontar la interfaz */}
+      {loading && (
+        <Grid size={{ xs: 12 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1.5,
+              py: 2,
+            }}
+          >
+            <CircularProgress size={24} />
+
+            <Typography color="text.secondary">
+              Actualizando datos de {selectedCity}...
+            </Typography>
+          </Box>
+        </Grid>
+      )}
+
+      {/* Error sin ocultar todo el dashboard */}
+      {error && (
+        <Grid size={{ xs: 12 }}>
+          <Alert severity="error">
+            {error}
+          </Alert>
+        </Grid>
+      )}
 
       {/* Gráfico */}
       <Grid
-        size={{ xs: 6, md: 6 }}
+        className="dashboard-chart"
+        size={{ xs: 12, md: 6 }}
         sx={{
           display: {
             xs: "none",
@@ -113,57 +148,63 @@ function App() {
           },
         }}
       >
-        {data && (
+        {data ? (
           <ChartUI
-            arrLabels={
-              data.hourly.time
-            }
+            arrLabels={data.hourly.time}
             arrValues1={
-              data.hourly
-                .temperature_2m
+              data.hourly.temperature_2m
             }
             arrValues2={
-              data.hourly
-                .relative_humidity_2m
+              data.hourly.relative_humidity_2m
             }
           />
+        ) : (
+          !loading &&
+          !error && (
+            <Typography>
+              No hay datos disponibles.
+            </Typography>
+          )
         )}
       </Grid>
 
       {/* Tabla */}
       <Grid
-        size={{ xs: 6, md: 6 }}
+        className="dashboard-table"
+        size={{ xs: 12, md: 6 }}
         sx={{
           display: {
             xs: "none",
             md: "block",
           },
-          minHeight: 400,
         }}
       >
-        {data && (
+        {data ? (
           <TableUI
-            arrLabels={
-              data.hourly.time
-            }
+            arrLabels={data.hourly.time}
             arrValues1={
-              data.hourly
-                .temperature_2m
+              data.hourly.temperature_2m
             }
             arrValues2={
-              data.hourly
-                .relative_humidity_2m
+              data.hourly.relative_humidity_2m
             }
           />
+        ) : (
+          !loading &&
+          !error && (
+            <Typography>
+              No hay datos disponibles.
+            </Typography>
+          )
         )}
       </Grid>
 
-      {/* Información adicional */}
-      <Grid size={{ xs: 12, md: 12 }}>
-        Ciudad seleccionada:{" "}
-        <strong>
-          {selectedOption ?? "Guayaquil"}
-        </strong>
+      {/* Ciudad seleccionada */}
+      <Grid size={{ xs: 12 }}>
+        <Box className="selected-city">
+          Ciudad seleccionada:{" "}
+          <strong>{selectedCity}</strong>
+        </Box>
       </Grid>
     </Grid>
   );
